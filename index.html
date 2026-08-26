@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabLens - Indian Research Lab & PI Experience Directory</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            800: '#0c4a6e',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-800 antialiased flex flex-col">
+
+<!-- Navigation Header -->
+<header class="bg-white text-white sticky top-0 z-40 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+
+            <!-- Logo -->
+            <div class="flex items-center cursor-pointer" onclick="navigateTo('directory')">
+                <img src="https://raw.githubusercontent.com/Tushraa/tushar-singha/main/LabLens.png" alt="LabLens Logo" class="h-10 w-auto object-contain">
+            </div>
+
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden md:flex space-x-1">
+            </nav>
+
+            <!-- Header Actions (Admin Toggle & Mobile Menu) -->
+            <div class="flex items-center space-x-3">
+                <button onclick="openSuggestModal()" class="flex items-center space-x-1 px-3 py-2 rounded-0-0-0 text-xs font-semibold bg-slate-800 text-white-300 hover:bg-brand-600 transition">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>Suggest a Lab</span>
+                </button>
+
+                <button onclick="navigateTo('admin')" id="nav-admin" class="flex items-center space-x-1 px-3 py-2 rounded-0-0-0 text-xs font-semibold bg-slate-800 text-white-300 hover:bg-brand-600 transition">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                    <span>Admin Portal</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation Menu -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800 px-4 pt-2 pb-4 space-y-2 bg-slate-900">
+        <button onclick="navigateTo('directory')" class="w-full text-left px-3 py-2 rounded-0-0-md text-base font-medium text-white hover:bg-slate-800">Find a Research Lab</button>
+        <button onclick="navigateTo('compare')" class="w-full text-left px-3 py-2 rounded-0-0-md text-base font-medium text-slate-300 hover:bg-slate-800">Compare Labs</button>
+        <button onclick="openSuggestModal()" class="w-full text-left px-3 py-2 rounded-0-0-md text-base font-medium text-slate-300 hover:bg-slate-800">Suggest a Missing Lab</button>
+    </div>
+</header>
+
+<!-- Main Dynamic Content Container -->
+<main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- VIEW 1: DIRECTORY PAGE -->
+    <section id="view-directory" class="space-y-6">
+        <div class="bg rounded-0-0-x0 shadow- p-5 sm:p-8">
+            <div class="max-w-3xl mb-4 mx-auto text-center">
+                <h1 class="text-5xl font-bold tracking-tight bg-gradient-to-r from-blue-700 to-amber-600 to-green-600 bg-clip-text text-transparent">Search Laboratories</h1>
+                <p class="text-sm text-slate-600 mt-1">Explore laboratory environments across Indian academic and national research institutions.</p>
+            </div>
+
+            <!-- Search Input Bar -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 mb-4">
+                <div class="md:col-span-6 relative">
+                    <i data-lucide="search" class="w-5 h-5 absolute left-3.5 top-3 text-slate-400"></i>
+                    <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="Search PI name, keyword (e.g., Organic, Quantum), institution..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-0-0-0g text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+                </div>
+                <div class="md:col-span-3">
+                    <select id="filter-area" onchange="handleSearch()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-0-0-0g text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+                        <option value="">All Research Fields</option>
+                        <option value="Organic Chemistry">Organic Chemistry</option>
+                        <option value="Inorganic & Materials">Inorganic & Materials</option>
+                        <option value="Computer Science & AI">Computer Science & AI</option>
+                        <option value="Condensed Matter Physics">Condensed Matter Physics</option>
+                        <option value="Molecular Biology">Molecular Biology</option>
+                    </select>
+                </div>
+                <div class="md:col-span-3">
+                    <select id="filter-inst" onchange="handleSearch()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-0-0-0g text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+                        <option value="">All Institution Types</option>
+                        <option value="IISc">IISc</option>
+                        <option value="IIT">IITs</option>
+                        <option value="IISER">IISERs</option>
+                        <option value="Central University">Central Universities</option>
+                        <option value="CSIR Lab">CSIR / National Labs</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Active Quick Tag Filters -->
+            <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 pt-2 border-t border-slate-100">
+                <span class="font-bold text-slate-700">Popular Keywords:</span>
+                <button onclick="setKeywordFilter('Photochemistry')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-0-0-full transition">Photochemistry</button>
+                <button onclick="setKeywordFilter('Machine Learning')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-0-0-full transition">Machine Learning</button>
+                <button onclick="setKeywordFilter('Catalysis')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-0-0-full transition">Catalysis</button>
+                <button onclick="setKeywordFilter('Semiconductors')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-0-0-full transition">Semiconductors</button>
+                <button onclick="clearFilters()" class="text-brand-600 hover:underline font-medium ml-auto">Clear Filters</button>
+            </div>
+        </div>
+
+        <!-- Lab Count Indicator -->
+        <div class="flex items-center justify-between px-1">
+            <span class="text-sm font-medium text-slate-600" id="search-count-label">Showing all verified laboratories</span>
+            <div class="flex items-center space-x-2 text-xs text-slate-500">
+                <span>Sort by:</span>
+                <select id="sort-select" onchange="handleSearch()" class="bg-transparent font-medium text-slate-700 focus:outline-none cursor-pointer">
+                    <option value="responses">Most Responses</option>
+                    <option value="rating">Highest Overall Rating</option>
+                    <option value="name">PI Name (A-Z)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Lab Cards Grid Container -->
+        <div id="labs-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </section>
+
+    <!-- VIEW 2: PI PROFILE PAGE -->
+    <section id="view-profile" class="hidden space-y-6">
+        <button onclick="navigateTo('directory')" class="inline-flex items-center text-sm font-medium text-slate-600 hover:text-brand-600 transition">
+            <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Back to Directory
+        </button>
+
+        <div class="bg-white rounded-0-0-x0 shadow-sm border border-slate-200 p-6 relative overflow-hidden" id="profile-header"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-7 bg-white rounded-0-0-x0 shadow-sm border border-slate-200 p-6 space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Research Environment Score Breakdown</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Categorized 1–5 average ratings based on approved anonymous researcher feedback.</p>
+                    </div>
+                    <button onclick="openRateModal()" class="px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-0-0-0g text-xs font-semibold shadow-sm transition flex items-center space-x-1.5">
+                        <i data-lucide="star" class="w-4 h-4"></i>
+                        <span>Rate This Lab</span>
+                    </button>
+                </div>
+                <div id="profile-metrics-list" class="space-y-3.5"></div>
+            </div>
+
+            <div class="lg:col-span-5 space-y-6">
+                <div class="bg-white rounded-0-0-x0 shadow-sm border border-slate-200 p-6 space-y-4">
+                    <h3 class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                        <i data-lucide="bar-chart-2" class="w-4 h-4 text-brand-600"></i>
+                        <span>Rating Reliability Index</span>
+                    </h3>
+                    <div id="profile-reliability-box"></div>
+                </div>
+
+                <div class="bg-white rounded-0-0-x0 shadow-sm border border-slate-200 p-6 space-y-3">
+                    <h3 class="font-bold text-slate-900 text-sm">Lab Comparison</h3>
+                    <p class="text-xs text-slate-600">Add this laboratory to your side-by-side comparison board to evaluate mentorship, workload, and output across labs.</p>
+                    <button id="add-compare-btn" onclick="toggleCompareProfile()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-0-0-0g text-xs font-semibold transition border border-slate-200 flex items-center justify-center space-x-1.5">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                        <span>Add to Comparison Matrix</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-0-0-x0 shadow-sm border border-slate-200 p-6 space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">Anonymized Researcher Experiences</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Qualitative reports submitted by current and former lab members.</p>
+                </div>
+                <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-0-0-0 font-medium self-start sm:self-auto" id="profile-reviews-count-tag">0 Experiences</span>
+            </div>
+            <div id="profile-reviews-list" class="space-y-4"></div>
+        </div>
+    </section>
+
+    <!-- VIEW 3: LAB COMPARISON MATRIX -->
+    <section id="view-compare" class="hidden space-y-6">
+        <div class="bg-white rounded-0-0-x0 shadow-sm border border-slate-200 p-6">
+            <h1 class="text-2xl font-bold text-slate-900">Compare Research Laboratories</h1>
+            <p class="text-sm text-slate-600 mt-1">Side-by-side evaluation of research environments, mentorship scores, and work-life balance.</p>
+        </div>
+        <div class="bg-white rounded-0-0-x0 shadow-sm border border-slate-200 overflow-x-auto custom-scrollbar">
+            <table class="w-full text-left border-collapse min-w-[700px]" id="compare-table"></table>
+        </div>
+    </section>
+
+    <!-- VIEW 4: ADMINISTRATOR CONTROL DASHBOARD -->
+    <section id="view-admin" class="hidden space-y-6">
+        <div class="bg-slate-900 text-white rounded-0-0-x0 p-6 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="px-2 py-0.5 bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold rounded-0-0">ADMINISTRATOR PRIVILEGES</span>
+                    <h1 class="text-xl font-bold">PI & Laboratory Master Database Control</h1>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">Curate PI profiles, manage institution associations, review community suggestions, and moderate submitted user reviews.</p>
+            </div>
+            <div class="flex items-center space-x-2 flex-shrink-0">
+                <button onclick="openAddPiModal()" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold text-xs rounded-0-0-0g transition shadow-sm flex items-center space-x-1.5">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>Add New PI Profile</span>
+                </button>
+                <button onclick="adminLogout()" class="px-3 py-2 bg-slate-800 hover:bg-red-900/50 text-red-300 border border-red-500/30 font-semibold text-xs rounded-0-0-0g transition shadow-sm flex items-center space-x-1">
+                    <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                    <span>Log Out</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs in Admin -->
+        <div class="border-b border-slate-200 flex space-x-6">
+            <button onclick="switchAdminTab('pi-list')" id="admin-tab-pi-list" class="pb-3 text-sm font-bold border-b-2 border-brand-600 text-brand-600">
+                PI Database Directory (<span id="admin-pi-count">0</span>)
+            </button>
+            <button onclick="switchAdminTab('moderation')" id="admin-tab-moderation" class="pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800">
+                Lab Suggestions Queue (<span id="admin-queue-count">0</span>)
+            </button>
+            <button onclick="switchAdminTab('pending-reviews')" id="admin-tab-pending-reviews" class="pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center space-x-1.5">
+                <span>Pending Reviews</span>
+                <span id="admin-pending-reviews-count" class="px-1.5 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-full">0</span>
+            </button>
+        </div>
+
+        <!-- Admin Tab Content 1: PI Directory Table -->
+        <div id="admin-content-pi-list" class="bg-white rounded-0-0-x0 shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+                <input type="text" id="admin-search-pi" onkeyup="renderAdminTable()" placeholder="Filter PI or institution in database..." class="px-3 py-1.5 border border-slate-300 rounded-0-0-0g text-xs w-72 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                <span class="text-xs text-slate-500">Only administrators can modify directory entries.</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
+                        <tr>
+                            <th class="p-3">PI Name</th>
+                            <th class="p-3">Institution & Dept</th>
+                            <th class="p-3">Research Field</th>
+                            <th class="p-3">Status</th>
+                            <th class="p-3 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-pi-tbody" class="divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Admin Tab Content 2: Suggestions Queue -->
+        <div id="admin-content-moderation" class="hidden bg-white rounded-0-0-x0 shadow-sm border border-slate-200 p-6 space-y-4">
+            <h3 class="font-bold text-slate-900 text-sm">Community Suggested Missing Labs</h3>
+            <p class="text-xs text-slate-500">Suggested entries undergo administrator review prior to inclusion in the public search directory.</p>
+            <div id="admin-queue-list" class="space-y-3"></div>
+        </div>
+
+        <!-- Admin Tab Content 3: Pending Reviews -->
+        <div id="admin-content-pending-reviews" class="hidden bg-white rounded-0-0-x0 shadow-sm border border-slate-200 p-6 space-y-4">
+            <div class="flex items-center justify-between border-b pb-3">
+                <div>
+                    <h3 class="font-bold text-slate-900 text-sm">Pending User Reviews Moderation</h3>
+                    <p class="text-xs text-slate-500">Submitted ratings and reviews require administrator approval before appearing publicly and updating lab scores.</p>
+                </div>
+            </div>
+            <div id="admin-pending-reviews-list" class="space-y-3"></div>
+        </div>
+    </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="bg-slate-900 text-slate-400 text-xs border-top-width: 2px border-blue-700 py-8 mt-12">
+    <div class="max-w-7xl mx-auto px-4 text-justify sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-1 bg-slate-900 rounded-0g shadow-0g max-w-lg">
+            <img src="https://raw.githubusercontent.com/Tushraa/tushar-singha/main/LabLens-removebg-preview.png" alt="LabLens Logo" class="h-8 mb-2 block">
+            <p class="leading-relaxed text-slate-400">
+                A specialized database for academic research environments, mentorship insights, and laboratory culture across Indian scientific institutions.
+            </p>
+        </div>
+        <div>
+            <span class="font-semibold text-slate-200 block mb-2">Platform Philosophy</span>
+            <p class="leading-relaxed">Designed to facilitate informed decisions for prospective PhD, Postdoc, and Master's candidates while prioritizing privacy-preserving anonymous experience reporting.</p>
+        </div>
+        <div>
+            <span class="font-semibold text-slate-200 block mb-2">Legal & Ethics Safeguards</span>
+            <p class="leading-relaxed">This platform does not publish unverified misconduct allegations. Personal identifying info and hate speech are strictly prohibited in reviews.</p>
+        </div>
+    </div>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 pt-4 border-t border-cyan-900 text-center text-slate-500">
+        &copy; 2026 LabLens India. Curation Controlled Exclusively by Platform Administrator.
+    </div>
+</footer>
+
+<!-- MODAL 1: RATE & REVIEW LAB MODAL -->
+<div id="modal-rate" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-0-0-x0 shadow-xl max-w-2xl w-full my-8 border border-slate-200 overflow-hidden">
+        <div class="bg-slate-900 text-white p-4 flex items-center justify-between">
+            <div>
+                <h3 class="font-bold text-base" id="rate-modal-title">Anonymous Lab Rating</h3>
+                <p class="text-xs text-slate-300">Submit an objective evaluation of your experience.</p>
+            </div>
+            <button onclick="closeModal('modal-rate')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+
+        <form id="form-rate-lab" onsubmit="submitLabRating(event)" class="p-6 space-y-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
+            <input type="hidden" id="rate-pi-id">
+
+            <div id="device-already-rated-notice" class="hidden bg-amber-50 border border-amber-200 p-3 rounded-0-0-0g text-xs text-amber-900 flex items-start space-x-2">
+                <i data-lucide="alert-circle" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"></i>
+                <div>
+                    <span class="font-bold">Already Rated on This Device:</span> You have already submitted a rating for this laboratory from this device.
+                </div>
+            </div>
+
+            <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-0-0-0g text-xs text-emerald-800 flex items-start space-x-2">
+                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                <div>
+                    <span class="font-semibold">Review Moderation Notice:</span> To maintain platform integrity, all submitted reviews undergo administrator verification before being published on public lab profiles.
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-0-0-0g border border-slate-200">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Your Role in Lab (Optional)</label>
+                    <select id="rate-role" class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-0-0 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                        <option value="Prefer not to say">Prefer not to say</option>
+                        <option value="PhD Student">PhD Student</option>
+                        <option value="Postdoctoral Researcher">Postdoctoral Researcher</option>
+                        <option value="Master's Student">Master's Student</option>
+                        <option value="Undergraduate Researcher">Undergraduate Researcher</option>
+                        <option value="Research Assistant">Research Assistant</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Relationship with Lab (Optional)</label>
+                    <select id="rate-relationship" class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-0-0-0 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                        <option value="Prefer not to say">Prefer not to say</option>
+                        <option value="Currently working here">Currently working here</option>
+                        <option value="Previously worked here">Previously worked here</option>
+                        <option value="Short-term project / intern">Short-term project / intern</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider text-brand-700 border-b pb-1">Rate Core Categories (1 to 5 Stars)</h4>
+                <div id="rating-sliders-container" class="space-y-3"></div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-xs font-semibold text-slate-800">
+                    Share Your Experience (Optional, max 2,500 chars)
+                </label>
+                <div class="bg-amber-50 border border-amber-200 p-2.5 rounded-0-0-0 text-[11px] text-amber-800">
+                    <i data-lucide="alert-triangle" class="w-3.5 h-3.5 inline mr-1 text-amber-600"></i>
+                    Please describe your own experience. Do not include personal phone numbers, email addresses, home addresses, or unverified misconduct accusations.
+                </div>
+                <textarea id="rate-review-text" rows="4" maxlength="2500" placeholder="Describe research guidance, independent thinking support, work environment, publication culture..." class="w-full p-3 border border-slate-300 rounded-0-0-0g text-xs focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
+            </div>
+
+            <div class="flex items-center justify-end space-x-3 pt-4 border-t">
+                <button type="button" onclick="closeModal('modal-rate')" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800">Cancel</button>
+                <button type="submit" id="submit-rating-btn" class="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-0-0-0g text-xs font-semibold shadow-sm transition">Submit Anonymous Rating</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL 2: SUGGEST A LAB MODAL -->
+<div id="modal-suggest" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-0-0-x0 shadow-xl max-w-md w-full border border-slate-200 overflow-hidden">
+        <div class="bg-slate-900 text-white p-4 flex items-center justify-between">
+            <h3 class="font-bold text-sm">Suggest a Research Laboratory</h3>
+            <button onclick="closeModal('modal-suggest')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <form onsubmit="submitLabSuggestion(event)" class="p-5 space-y-4">
+            <p class="text-xs text-slate-600">Can't find your PI or laboratory? Submit their details for verification, and we'll add them to the database within 24 hours.</p>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">PI Full Name *</label>
+                <input type="text" id="sug-name" required placeholder="e.g. Dr. Rajesh Sharma" class="w-full px-3 py-2 border border-slate-300 rounded-0-0-0 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Institution *</label>
+                <input type="text" id="sug-inst" required placeholder="e.g. IIT Kharagpur" class="w-full px-3 py-2 border border-slate-300 rounded-0-0-0 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Department *</label>
+                <input type="text" id="sug-dept" required placeholder="e.g. Department of Physics" class="w-full px-3 py-2 border border-slate-300 rounded-0-0-0 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Broad Research Area</label>
+                <input type="text" id="sug-area" placeholder="e.g. Condensed Matter / Nanotechnology" class="w-full px-3 py-2 border border-slate-300 rounded-0-0-0 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+            </div>
+
+            <div class="flex items-center justify-end space-x-2 pt-2">
+                <button type="button" onclick="closeModal('modal-suggest')" class="px-3 py-1.5 text-xs text-slate-600">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs rounded-0-0-0 transition">Submit Suggestion</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL 3: ADMIN ADD / EDIT PI MODAL -->
+<div id="modal-admin-pi" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-0-0-x0 shadow-xl max-w-xl w-full my-8 border border-slate-200 overflow-hidden">
+        <div class="bg-slate-900 text-white p-4 flex items-center justify-between">
+            <h3 class="font-bold text-sm" id="admin-pi-modal-title">Admin: Add New PI Profile</h3>
+            <button onclick="closeModal('modal-admin-pi')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <form id="form-admin-pi" onsubmit="saveAdminPi(event)" class="p-6 space-y-4">
+            <input type="hidden" id="admin-pi-id">
+
+            <div id="duplicate-warning" class="hidden bg-amber-50 border border-amber-300 p-3 rounded-0-0-0g text-xs text-amber-900 space-y-2">
+                <div class="font-bold flex items-center space-x-1.5">
+                    <i data-lucide="alert-circle" class="w-4 h-4 text-amber-600"></i>
+                    <span>Possible Duplicate Detected in Database</span>
+                </div>
+                <p id="duplicate-msg" class="text-slate-700"></p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">PI Full Name *</label>
+                    <input type="text" id="admin-pi-name" required onblur="checkDuplicatePi()" placeholder="Dr. First Last" class="w-full px-3 py-2 border border-slate-300 rounded-0-0-0 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Institution Type *</label>
+                    <select id="admin-pi-inst-type" class="w-full px-3 py-2 border border-slate-300 rounded-0-0-0 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                        <option value="IISc">IISc</option>
+                        <option value="IIT">IIT</option>
+                        <option value="IISER">IISER</option>
+                        <option value="Central University">Central University</option>
+                        <option value="CSIR Lab">CSIR Lab</option>
+                        <option value="Other">Other Research Inst</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Institution Name *</label>
+                    <input type="text" id="admin-pi-inst" required placeholder="e.g. IIT Bombay" class="w-full px-3 py-2 border border-slate-300 rounded-0-0-0 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Department *</label>
+                    <input type="text" id="admin-pi-dept" required placeholder="Department of Chemistry" class="w-full px-3 py-2 border border-slate-300 rounded-0-0-0 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Broad Research Area *</label>
+                    <input type="text" id="admin-pi-area" required placeholder="Organic Chemistry" class="w-full px-3 py-2 border border-slate-300 rounded-0-0-0 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">City / State *</label>
+                    <input type="text" id="admin-pi-location" required placeholder="Mumbai, Maharashtra" class="w-full px-3 py-2 border border-slate-300 rounded-0-0 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Research Keywords (Comma separated)</label>
+                <input type="text" id="admin-pi-keywords" placeholder="Photochemistry, Radical Synthesis, Catalysis" class="w-full px-3 py-2 border border-slate-300 rounded-0-0 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Lab Website (Optional)</label>
+                    <input type="url" id="admin-pi-website" placeholder="https://..." class="w-full px-3 py-2 border border-slate-300 rounded-0-0 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Status *</label>
+                    <select id="admin-pi-status" class="w-full px-3 py-2 border border-slate-300 rounded-0-0 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                        <option value="Active">Active Lab</option>
+                        <option value="Inactive/Closed">Inactive / Closed Lab</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end space-x-2 pt-3 border-t">
+                <button type="button" onclick="closeModal('modal-admin-pi')" class="px-4 py-2 text-xs text-slate-600">Cancel</button>
+                <button type="submit" class="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs rounded-0-0 transition">Save PI Entry</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL 4: REPORT CONTENT MODAL -->
+<div id="modal-report" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-0-0-xl shadow-xl max-w-md w-full border border-slate-200 overflow-hidden">
+        <div class="bg-slate-900 text-white p-4 flex items-center justify-between">
+            <h3 class="font-bold text-sm">Report Review / Content</h3>
+            <button onclick="closeModal('modal-report')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <form onsubmit="submitReport(event)" class="p-5 space-y-4">
+            <p class="text-xs text-slate-600">Reports are reviewed by the platform administrator.</p>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Reason for Report</label>
+                <select id="report-reason" class="w-full px-3 py-2 border border-slate-300 rounded-0-0 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                    <option value="identifying">Contains Personal Identifying Information (PII)</option>
+                    <option value="abuse">Contains Personal Abuse / Defamation</option>
+                    <option value="spam">Spam / Duplicate Entry</option>
+                    <option value="other">Other Violation</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Additional Details</label>
+                <textarea id="report-details" rows="3" class="w-full p-2.5 border border-slate-300 rounded-0-0 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500" placeholder="Specify details..."></textarea>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button type="button" onclick="closeModal('modal-report')" class="px-3 py-1.5 text-xs text-slate-600">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold text-xs rounded-0-0 transition">Submit Flag</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL 5: ADMIN LOGIN MODAL -->
+<div id="modal-admin-login" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-0-0-xl shadow-2xl max-w-sm w-full border border-slate-200 overflow-hidden">
+        <div class="bg-slate-900 text-white p-4 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i data-lucide="lock" class="w-4 h-4 text-amber-400"></i>
+                <h3 class="font-bold text-sm">Admin Portal Authentication</h3>
+            </div>
+            <button onclick="closeModal('modal-admin-login')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <form onsubmit="submitAdminLogin(event)" class="p-6 space-y-4">
+            <div id="admin-login-error" class="hidden bg-red-50 border border-red-200 text-red-700 p-2.5 rounded-0-0 text-xs">
+                Invalid username or password.
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Admin Username</label>
+                <input type="text" id="admin-user" required placeholder="Username" class="w-full px-3 py-2 border border-slate-300 rounded-0-0 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Admin Password</label>
+                <input type="password" id="admin-pass" required placeholder="••••••••" class="w-full px-3 py-2 border border-slate-300 rounded-0-0 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button type="button" onclick="closeModal('modal-admin-login')" class="px-3 py-1.5 text-xs text-slate-600">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white-900 font-bold text-xs rounded-0-0 transition shadow-sm">Log In to Portal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MAIN JAVASCRIPT APPLICATION LOGIC -->
+<script>
+    // SUPABASE CLIENT CONFIGURATION
+    const SUPABASE_URL = 'https://sztiwomedrdzqdrtpcms.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6dGl3b21lZHJkenFkcnRwY21zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0ODg0NTcsImV4cCI6MjEwMzA2NDQ1N30.FIQUxfTmQzechnqAH7XB-9D_e4uIM2XpiCUmP2fC7rw';
+
+    let supabaseClient = null;
+    let isSupabaseConnected = false;
+    let isAdminAuthenticated = sessionStorage.getItem('res_admin_auth') === 'true';
+
+    try {
+        if (window.supabase && SUPABASE_URL.indexOf('YOUR_PROJECT_ID') === -1) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            isSupabaseConnected = true;
+        }
+    } catch (e) {
+        console.warn("Supabase initialization deferred:", e);
+    }
+
+    // DEVICE RATING RATE-LIMITING HELPERS
+    function getRatedLabs() {
+        try {
+            const stored = localStorage.getItem('res_rated_labs');
+            return stored ? JSON.parse(stored) : [];
+        } catch (e) { return []; }
+    }
+
+    function hasDeviceRatedLab(labId) {
+        return getRatedLabs().includes(labId);
+    }
+
+    function recordDeviceRating(labId) {
+        const list = getRatedLabs();
+        if (!list.includes(labId)) {
+            list.push(labId);
+            try { localStorage.setItem('res_rated_labs', JSON.stringify(list)); } catch (e) {}
+        }
+    }
+
+    // ADMIN AUTHENTICATION HELPERS
+    function openAdminLoginModal() {
+        document.getElementById('admin-login-error').classList.add('hidden');
+        document.getElementById('modal-admin-login').classList.remove('hidden');
+    }
+
+    function submitAdminLogin(e) {
+        e.preventDefault();
+        const user = document.getElementById('admin-user').value.trim();
+        const pass = document.getElementById('admin-pass').value.trim();
+
+        if (user === 'happilo_14184' && pass === 'destrictsahdgv$%^E#') {
+            isAdminAuthenticated = true;
+            sessionStorage.setItem('res_admin_auth', 'true');
+            closeModal('modal-admin-login');
+            navigateTo('admin');
+        } else {
+            document.getElementById('admin-login-error').classList.remove('hidden');
+        }
+    }
+
+    function adminLogout() {
+        isAdminAuthenticated = false;
+        sessionStorage.removeItem('res_admin_auth');
+        alert("Logged out of Admin Portal.");
+        navigateTo('directory');
+    }
+
+    function openAddPiModal() {
+        document.getElementById('admin-pi-modal-title').textContent = "Admin: Add New PI Profile";
+        document.getElementById('admin-pi-id').value = "";
+        document.getElementById('form-admin-pi').reset();
+        document.getElementById('duplicate-warning').classList.add('hidden');
+        document.getElementById('modal-admin-pi').classList.remove('hidden');
+    }
+
+    // CATEGORY CONSTANTS
+    const RATING_CATEGORIES = [
+        { id: 'research', label: 'Research Scientific Direction', desc: 'How scientifically interesting and well-directed is the research?' },
+        { id: 'output', label: 'Research Output & Productivity', desc: 'Publications, lab velocity, and contribution opportunities.' },
+        { id: 'opportunities', label: 'Research Opportunities', desc: 'Freedom to develop independent research directions.' },
+        { id: 'environment', label: 'Laboratory Environment', desc: 'Overall lab atmosphere and work culture.' },
+        { id: 'mentorship', label: 'Mentorship & Supervision', desc: 'Quality of PI guidance and feedback accessibility.' },
+        { id: 'worklife', label: 'Work–Life Balance', desc: 'Reasonableness of workload and work hours.' },
+        { id: 'authorship', label: 'Publication & Authorship', desc: 'Fairness in credit and authorship practices.' },
+        { id: 'collaboration', label: 'Collaboration', desc: 'Support for inter-group and multi-disciplinary research.' },
+        { id: 'funding', label: 'Funding & Infrastructure', desc: 'Adequacy of equipment, resources, and supplies.' },
+        { id: 'career', label: 'Career Development', desc: 'Support for future career pathways.' },
+        { id: 'admin', label: 'Administrative Support', desc: 'Efficiency with fellowships and documentation.' }
+    ];
+
+    // FALLBACK SEED DATA
+    let dbPIs = [
+        {
+            id: 'pi-1',
+            name: 'Dr. Arindam Mukherjee',
+            institution: 'IISc Bangalore',
+            instType: 'IISc',
+            department: 'Department of Inorganic & Physical Chemistry',
+            area: 'Inorganic Chemistry',
+            keywords: ['Photochemistry', 'Catalysis', 'Radical Synthesis'],
+            location: 'Bengaluru, Karnataka',
+            website: 'https://iisc.ac.in',
+            status: 'Active',
+            responsesCount: 24,
+            metrics: {
+                research: 4.5, output: 4.6, opportunities: 4.1, environment: 3.8,
+                mentorship: 3.4, worklife: 2.9, authorship: 4.2, collaboration: 4.0,
+                funding: 4.7, career: 4.3, admin: 3.9
+            },
+            reviews: [
+                {
+                    id: 'r-101',
+                    role: 'PhD Student',
+                    relationship: 'Currently working here',
+                    year: '2026',
+                    text: 'Research resources and instrumentation availability at IISc are outstanding. Funding is rarely an issue.',
+                    ratings: { research: 5, mentorship: 3, worklife: 2 },
+                    status: 'approved'
+                }
+            ]
+        }
+    ];
+
+    let dbSuggestions = [
+        { id: 'sug-1', name: 'Dr. Vivek Agrawal', institution: 'IIT Delhi', department: 'Department of Biochemical Eng', area: 'Bioprocess Eng', status: 'Pending Review' }
+    ];
+
+    let dbPendingReviews = [];
+
+    let comparePiIds = ['pi-1'];
+    let currentView = 'directory';
+    let currentProfileId = null;
+    let adminActiveTab = 'pi-list';
+
+    window.onload = function() {
+        lucide.createIcons();
+        buildRatingSliders();
+        fetchLabsFromCloud();
+    };
+
+    async function fetchLabsFromCloud() {
+        if (!isSupabaseConnected || !supabaseClient) {
+            renderDirectory();
+            renderAdminTable();
+            renderAdminQueue();
+            renderAdminPendingReviews();
+            return;
+        }
+
+        try {
+            // Fetch labs and all reviews
+            const { data, error } = await supabaseClient
+                .from('labs')
+                .select('*, reviews(*)');
+
+            if (error) throw error;
+
+            if (data && data.length > 0) {
+                dbPIs = data.map(lab => {
+                    // Only count APPROVED reviews in public interface ratings and comments
+                    const approvedRevs = (lab.reviews || []).filter(r => r.status === 'approved');
+                    const count = approvedRevs.length;
+
+                    const metrics = {};
+                    RATING_CATEGORIES.forEach(cat => { metrics[cat.id] = 0; });
+
+                    if (count > 0) {
+                        approvedRevs.forEach(r => {
+                            const rat = r.ratings || {};
+                            RATING_CATEGORIES.forEach(cat => {
+                                metrics[cat.id] += (parseFloat(rat[cat.id]) || 3.0) / count;
+                            });
+                        });
+                    }
+
+                    RATING_CATEGORIES.forEach(cat => {
+                        metrics[cat.id] = parseFloat(metrics[cat.id].toFixed(1));
+                    });
+
+                    return {
+                        id: lab.id,
+                        name: lab.name,
+                        institution: lab.institution,
+                        instType: lab.inst_type || 'Other',
+                        department: lab.department,
+                        area: lab.area,
+                        keywords: lab.keywords || [],
+                        location: lab.location || '',
+                        website: lab.website || '',
+                        status: lab.status || 'Active',
+                        responsesCount: count,
+                        metrics: metrics,
+                        reviews: approvedRevs.map(r => ({
+                            id: r.id,
+                            role: r.role,
+                            relationship: r.relationship,
+                            year: r.year || '2026',
+                            text: r.review_text,
+                            status: r.status
+                        }))
+                    };
+                });
+            }
+
+            // Fetch Pending Lab Suggestions
+            const { data: sugData } = await supabaseClient.from('suggestions').select('*').eq('status', 'Pending Review');
+            if (sugData) {
+                dbSuggestions = sugData.map(s => ({
+                    id: s.id, name: s.name, institution: s.institution, department: s.department, area: s.area
+                }));
+            }
+
+            // Fetch Pending Reviews for Admin Moderation
+            const { data: pendingRevsData } = await supabaseClient
+                .from('reviews')
+                .select('*, labs(name, institution)')
+                .eq('status', 'pending');
+
+            if (pendingRevsData) {
+                dbPendingReviews = pendingRevsData.map(r => ({
+                    id: r.id,
+                    labId: r.lab_id,
+                    labName: r.labs ? r.labs.name : 'Unknown Lab',
+                    labInstitution: r.labs ? r.labs.institution : '',
+                    role: r.role,
+                    relationship: r.relationship,
+                    year: r.year || '2026',
+                    text: r.review_text,
+                    ratings: r.ratings,
+                    status: r.status
+                }));
+            }
+
+            renderDirectory();
+            renderAdminTable();
+            renderAdminQueue();
+            renderAdminPendingReviews();
+            if (currentProfileId) renderProfilePage(currentProfileId);
+
+        } catch (err) {
+            console.error("Cloud fetch error:", err.message);
+            renderDirectory();
+        }
+    }
+
+    function navigateTo(view, piId = null) {
+        if (view === 'admin' && !isAdminAuthenticated) {
+            openAdminLoginModal();
+            return;
+        }
+
+        currentView = view;
+        ['directory', 'profile', 'compare', 'admin'].forEach(v => {
+            document.getElementById(`view-${v}`).classList.add('hidden');
+        });
+
+        if (view === 'directory') {
+            document.getElementById('view-directory').classList.remove('hidden');
+            renderDirectory();
+        } else if (view === 'profile' && piId) {
+            currentProfileId = piId;
+            document.getElementById('view-profile').classList.remove('hidden');
+            renderProfilePage(piId);
+        } else if (view === 'compare') {
+            document.getElementById('view-compare').classList.remove('hidden');
+            renderCompareMatrix();
+        } else if (view === 'admin') {
+            document.getElementById('view-admin').classList.remove('hidden');
+            renderAdminTable();
+            renderAdminQueue();
+            renderAdminPendingReviews();
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        lucide.createIcons();
+    }
+
+    // DIRECTORY RENDER LOGIC
+    function renderDirectory() {
+        const container = document.getElementById('labs-grid');
+        const searchVal = document.getElementById('search-input').value.toLowerCase();
+        const areaVal = document.getElementById('filter-area').value;
+        const instVal = document.getElementById('filter-inst').value;
+        const sortVal = document.getElementById('sort-select').value;
+
+        // Filter labs based on search input & drop-downs
+        let filtered = dbPIs.filter(pi => {
+            const matchSearch = pi.name.toLowerCase().includes(searchVal) ||
+                                pi.institution.toLowerCase().includes(searchVal) ||
+                                pi.department.toLowerCase().includes(searchVal) ||
+                                pi.area.toLowerCase().includes(searchVal) ||
+                                pi.keywords.some(k => k.toLowerCase().includes(searchVal));
+            const matchArea = !areaVal || pi.area === areaVal;
+            const matchInst = !instVal || pi.instType === instVal;
+            return matchSearch && matchArea && matchInst;
+        });
+
+        filtered.sort((a, b) => {
+            if (sortVal === 'responses') return b.responsesCount - a.responsesCount;
+            if (sortVal === 'rating') return calculateOverallScore(b.metrics) - calculateOverallScore(a.metrics);
+            if (sortVal === 'name') return a.name.localeCompare(b.name);
+            return 0;
+        });
+
+        // CONDITIONAL DISPLAY: Show 9 labs by default; show ALL matching labs if search/filters are active
+        const isSearchActive = searchVal.trim() !== "" || areaVal !== "" || instVal !== "";
+        const displayedPIs = isSearchActive ? filtered : filtered.slice(0, 9);
+
+        document.getElementById('search-count-label').textContent = isSearchActive
+            ? `Showing all ${displayedPIs.length} matching laboratories`
+            : `Showing top ${displayedPIs.length} research laboratories`;
+
+        if (displayedPIs.length === 0) {
+            container.innerHTML = `
+                <div class="col-span-full bg-white rounded-0-0-x0 p-8 text-center border border-slate-200">
+                    <i data-lucide="search-x" class="w-10 h-10 text-slate-400 mx-auto mb-2"></i>
+                    <h3 class="font-bold text-slate-700">No matching laboratories found</h3>
+                    <button onclick="openSuggestModal()" class="mt-4 px-4 py-2 bg-brand-600 text-white rounded-0-0-0g text-xs font-semibold">Suggest Missing Lab</button>
+                </div>
+            `;
+            lucide.createIcons();
+            return;
+        }
+
+        container.innerHTML = displayedPIs.map(pi => {
+            const overallScore = calculateOverallScore(pi.metrics);
+            const hasReliableScore = pi.responsesCount >= 5;
+
+            return `
+                <div class="bg-white rounded-0-0-xl border border-slate-200 hover:border-brand-500 hover:shadow-md transition duration-200 flex flex-col justify-between p-5 space-y-4">
+                    <div>
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base leading-snug">${pi.name}</h3>
+                                <p class="text-xs font-medium text-brand-600 mt-0.5">${pi.department}</p>
+                                <p class="text-xs text-slate-500 font-medium">${pi.institution} · <span class="text-slate-400">${pi.location}</span></p>
+                            </div>
+                            <span class="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-600 rounded-0-0 border border-slate-200">${pi.instType}</span>
+                        </div>
+
+                        <div class="mt-3 inline-block px-2.5 py-1 bg-brand-50 text-brand-700 font-medium text-xs rounded-0-0-md">
+                            <i data-lucide="atom" class="w-3.5 h-3.5 inline mr-1 text-brand-500"></i>${pi.area}
+                        </div>
+
+                        <div class="mt-3 flex flex-wrap gap-1">
+                            ${pi.keywords.map(k => `<span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-0-0">${k}</span>`).join('')}
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                ${hasReliableScore ? `
+                                    <div class="flex items-center space-x-1.5">
+                                        <span class="text-sm font-bold text-slate-900">${overallScore.toFixed(1)}</span>
+                                        <div class="flex text-amber-400">${renderStarRating(overallScore)}</div>
+                                        <span class="text-xs text-slate-400 font-normal">/ 5.0</span>
+                                    </div>
+                                ` : `
+                                    <span class="text-xs font-medium text-slate-500">Insufficient responses</span>
+                                `}
+                                <p class="text-[11px] text-slate-500 flex items-center space-x-1 mt-0.5">
+                                    <i data-lucide="users" class="w-3 h-3 text-slate-400"></i>
+                                    <span>${pi.responsesCount} approved responses</span>
+                                </p>
+                            </div>
+
+                            <button onclick="navigateTo('profile', '${pi.id}')" class="px-3 py-1.5 bg-slate-900 hover:bg-brand-600 text-white rounded-0-0-0g text-xs font-semibold transition flex items-center space-x-1">
+                                <span>View Profile</span>
+                                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        lucide.createIcons();
+    }
+
+    function handleSearch() { renderDirectory(); }
+    function setKeywordFilter(kw) { document.getElementById('search-input').value = kw; renderDirectory(); }
+    function clearFilters() {
+        document.getElementById('search-input').value = '';
+        document.getElementById('filter-area').value = '';
+        document.getElementById('filter-inst').value = '';
+        renderDirectory();
+    }
+
+    // PROFILE PAGE RENDER LOGIC
+    function renderProfilePage(piId) {
+        const pi = dbPIs.find(p => p.id === piId);
+        if (!pi) return;
+
+        const overallScore = calculateOverallScore(pi.metrics);
+        const hasReliableScore = pi.responsesCount >= 5;
+
+        const headerContainer = document.getElementById('profile-header');
+        headerContainer.innerHTML = `
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="px-2 py-0.5 bg-brand-100 text-brand-800 font-bold text-xs rounded-0-0">${pi.instType}</span>
+                        <span class="px-2 py-0.5 ${pi.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'} font-semibold text-xs rounded-0-0">${pi.status}</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">${pi.name}</h1>
+                    <p class="text-sm font-semibold text-brand-600">${pi.department}</p>
+                    <p class="text-xs text-slate-600 font-medium">${pi.institution} · <span class="text-slate-500">${pi.location}</span></p>
+
+                    <div class="flex flex-wrap items-center gap-2 pt-1">
+                        <span class="text-xs font-semibold text-slate-700">Broad Area:</span>
+                        <span class="text-xs bg-slate-100 text-slate-800 px-2.5 py-0.5 rounded-0-0-full font-medium border border-slate-200">${pi.area}</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-0-0-xl p-4 text-center md:text-right min-w-[200px] flex flex-col justify-center">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Overall Experience Score</span>
+                    ${hasReliableScore ? `
+                        <div class="flex items-baseline justify-center md:justify-end space-x-1 my-1">
+                            <span class="text-3xl font-extrabold text-slate-900">${overallScore.toFixed(1)}</span>
+                            <span class="text-sm text-slate-400 font-medium">/ 5.0</span>
+                        </div>
+                        <div class="flex text-amber-400 justify-center md:justify-end mb-1">${renderStarRating(overallScore)}</div>
+                    ` : `
+                        <div class="my-2 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 p-2 rounded-0-0">
+                            Insufficient responses (&lt; 5 required)
+                        </div>
+                    `}
+                    <span class="text-[11px] text-slate-500 block">Based on ${pi.responsesCount} approved responses</span>
+                </div>
+            </div>
+        `;
+
+        const metricsContainer = document.getElementById('profile-metrics-list');
+        metricsContainer.innerHTML = RATING_CATEGORIES.map(cat => {
+            const score = pi.metrics[cat.id] || 0;
+            const percentage = (score / 5) * 100;
+            return `
+                <div class="space-y-1">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-semibold text-slate-800">${cat.label}</span>
+                        <span class="font-bold text-slate-900">${hasReliableScore ? score.toFixed(1) : 'N/A'}</span>
+                    </div>
+                    <div class="w-full h-2.5 bg-slate-100 rounded-0-0-full overflow-hidden">
+                        <div class="h-full bg-brand-500 rounded-0-0-full transition-all duration-500" style="width: ${hasReliableScore ? percentage : 0}%"></div>
+                    </div>
+                    <p class="text-[10px] text-slate-500">${cat.desc}</p>
+                </div>
+            `;
+        }).join('');
+
+        const relBox = document.getElementById('profile-reliability-box');
+        relBox.innerHTML = `
+            <div class="space-y-3 text-xs">
+                <div class="flex items-center justify-between border-b pb-2">
+                    <span class="text-slate-600">Approved Sample Count:</span>
+                    <span class="font-bold text-slate-900">${pi.responsesCount} Approved Ratings</span>
+                </div>
+                <div class="flex items-center justify-between border-b pb-2">
+                    <span class="text-slate-600">Reliability Status:</span>
+                    <span class="font-semibold ${hasReliableScore ? 'text-emerald-600' : 'text-amber-600'}">
+                        ${hasReliableScore ? 'Reliable Sample' : 'Awaiting Min Threshold'}
+                    </span>
+                </div>
+            </div>
+        `;
+
+        const reviewsContainer = document.getElementById('profile-reviews-list');
+        document.getElementById('profile-reviews-count-tag').textContent = `${pi.reviews.length} Approved Experiences`;
+
+        if (pi.reviews.length === 0) {
+            reviewsContainer.innerHTML = `
+                <div class="p-6 text-center text-xs text-slate-500 bg-slate-50 rounded-0-0-lg border border-dashed border-slate-300">
+                    No approved written experiences have been published for this laboratory yet.
+                    <br><button onclick="openRateModal()" class="mt-2 text-brand-600 font-semibold hover:underline">Submit a review for moderation</button>
+                </div>
+            `;
+        } else {
+            reviewsContainer.innerHTML = pi.reviews.map(rev => `
+                <div class="bg-slate-50 rounded-0-0-lg p-4 border border-slate-200/80 space-y-2">
+                    <div class="flex items-center justify-between text-xs text-slate-500 border-b border-slate-200/60 pb-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="font-semibold text-slate-700 bg-white px-2 py-0.5 rounded-0-0 border border-slate-200">${rev.role || 'Researcher'}</span>
+                            <span>·</span>
+                            <span>${rev.relationship || 'Lab Member'}</span>
+                        </div>
+                        <span class="text-[11px] font-medium text-slate-400">Reported in ${rev.year}</span>
+                    </div>
+                    <p class="text-xs text-slate-700 leading-relaxed">${rev.text || 'Rating score submitted without additional comment.'}</p>
+                    <div class="flex items-center justify-end pt-1">
+                        <button onclick="openReportModal('${rev.id}')" class="text-[11px] text-slate-400 hover:text-red-600 flex items-center space-x-1">
+                            <i data-lucide="flag" class="w-3 h-3"></i>
+                            <span>Report content</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        const inCompare = comparePiIds.includes(piId);
+        const compBtn = document.getElementById('add-compare-btn');
+        compBtn.innerHTML = inCompare ?
+            `<i data-lucide="check" class="w-4 h-4 text-emerald-600"></i><span>Added to Compare Matrix</span>` :
+            `<i data-lucide="plus-circle" class="w-4 h-4"></i><span>Add to Comparison Matrix</span>`;
+
+        lucide.createIcons();
+    }
+
+    function toggleCompareProfile() {
+        if (!currentProfileId) return;
+        const idx = comparePiIds.indexOf(currentProfileId);
+        if (idx > -1) {
+            comparePiIds.splice(idx, 1);
+        } else {
+            if (comparePiIds.length >= 3) {
+                alert("You can compare up to 3 laboratories simultaneously.");
+                return;
+            }
+            comparePiIds.push(currentProfileId);
+        }
+        renderProfilePage(currentProfileId);
+    }
+
+    // COMPARE MATRIX
+    function renderCompareMatrix() {
+        const table = document.getElementById('compare-table');
+        const compPIs = dbPIs.filter(p => comparePiIds.includes(p.id));
+
+        if (compPIs.length === 0) {
+            table.innerHTML = `<tbody><tr><td class="p-8 text-center text-xs text-slate-500">No laboratories selected for comparison.</td></tr></tbody>`;
+            return;
+        }
+
+        let html = `
+            <thead>
+                <tr class="bg-slate-100 border-b border-slate-200 text-xs text-slate-700">
+                    <th class="p-4 w-56 font-bold">Category</th>
+                    ${compPIs.map(p => `
+                        <th class="p-4 font-bold border-l border-slate-200">
+                            <div>${p.name}</div>
+                            <div class="text-[11px] font-normal text-slate-500">${p.institution}</div>
+                            <button onclick="removeFromCompare('${p.id}')" class="text-[10px] text-red-500 font-normal hover:underline mt-1">Remove</button>
+                        </th>
+                    `).join('')}
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 text-xs">
+                <tr class="bg-slate-50/50">
+                    <td class="p-4 font-bold text-slate-900">Overall Rating</td>
+                    ${compPIs.map(p => `
+                        <td class="p-4 font-extrabold text-brand-700 border-l border-slate-200 text-sm">
+                            ${p.responsesCount >= 5 ? calculateOverallScore(p.metrics).toFixed(1) + ' / 5.0' : 'Insufficient Data'}
+                        </td>
+                    `).join('')}
+                </tr>
+                ${RATING_CATEGORIES.map(cat => `
+                    <tr>
+                        <td class="p-3.5 font-semibold text-slate-700">${cat.label}</td>
+                        ${compPIs.map(p => `
+                            <td class="p-3.5 border-l border-slate-200 font-medium">
+                                ${p.responsesCount >= 5 ? (p.metrics[cat.id] || 0).toFixed(1) : 'N/A'}
+                            </td>
+                        `).join('')}
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+
+        table.innerHTML = html;
+    }
+
+    function removeFromCompare(id) {
+        comparePiIds = comparePiIds.filter(x => x !== id);
+        renderCompareMatrix();
+    }
+
+    // ADMIN MANAGEMENT TABS & RENDERING
+    function switchAdminTab(tab) {
+        adminActiveTab = tab;
+        document.getElementById('admin-content-pi-list').classList.toggle('hidden', tab !== 'pi-list');
+        document.getElementById('admin-content-moderation').classList.toggle('hidden', tab !== 'moderation');
+        document.getElementById('admin-content-pending-reviews').classList.toggle('hidden', tab !== 'pending-reviews');
+
+        document.getElementById('admin-tab-pi-list').className = tab === 'pi-list' ?
+            "pb-3 text-sm font-bold border-b-2 border-brand-600 text-brand-600" :
+            "pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800";
+
+        document.getElementById('admin-tab-moderation').className = tab === 'moderation' ?
+            "pb-3 text-sm font-bold border-b-2 border-brand-600 text-brand-600" :
+            "pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800";
+
+        document.getElementById('admin-tab-pending-reviews').className = tab === 'pending-reviews' ?
+            "pb-3 text-sm font-bold border-b-2 border-brand-600 text-brand-600 flex items-center space-x-1.5" :
+            "pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center space-x-1.5";
+    }
+
+    function renderAdminTable() {
+        const tbody = document.getElementById('admin-pi-tbody');
+        const search = document.getElementById('admin-search-pi').value.toLowerCase();
+        document.getElementById('admin-pi-count').textContent = dbPIs.length;
+
+        const filtered = dbPIs.filter(p =>
+            p.name.toLowerCase().includes(search) || p.institution.toLowerCase().includes(search)
+        );
+
+        tbody.innerHTML = filtered.map(pi => `
+            <tr class="hover:bg-slate-50 transition">
+                <td class="p-3 font-semibold text-slate-900">${pi.name}</td>
+                <td class="p-3 text-slate-600">${pi.institution} <br><span class="text-[10px] text-slate-400">${pi.department}</span></td>
+                <td class="p-3 text-slate-600">${pi.area}</td>
+                <td class="p-3">
+                    <span class="px-2 py-0.5 text-[10px] font-semibold rounded-0-0 ${pi.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}">${pi.status}</span>
+                </td>
+                <td class="p-3 text-right space-x-1">
+                    <button onclick="editPiModal('${pi.id}')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-0-0 text-[11px] font-semibold">Edit</button>
+                    <button onclick="deletePi('${pi.id}')" class="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-0-0 text-[11px] font-semibold">Archive</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function renderAdminQueue() {
+        const container = document.getElementById('admin-queue-list');
+        document.getElementById('admin-queue-count').textContent = dbSuggestions.length;
+
+        if (dbSuggestions.length === 0) {
+            container.innerHTML = `<div class="text-xs text-slate-500 italic p-4 text-center">No pending lab suggestions in moderation queue.</div>`;
+            return;
+        }
+
+        container.innerHTML = dbSuggestions.map(sug => `
+            <div class="bg-slate-50 border border-slate-200 rounded-0-0-lg p-4 flex items-center justify-between text-xs">
+                <div>
+                    <span class="font-bold text-slate-900">${sug.name}</span>
+                    <p class="text-slate-600">${sug.department} · ${sug.institution}</p>
+                    <span class="text-[10px] text-slate-400">Broad Area: ${sug.area || 'N/A'}</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="approveSuggestion('${sug.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-0-0 font-semibold transition">Approve & Add</button>
+                    <button onclick="rejectSuggestion('${sug.id}')" class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-0-0 font-semibold transition">Reject</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // RENDER PENDING REVIEWS IN ADMIN PORTAL
+    function renderAdminPendingReviews() {
+        const container = document.getElementById('admin-pending-reviews-list');
+        const badge = document.getElementById('admin-pending-reviews-count');
+        if (badge) badge.textContent = dbPendingReviews.length;
+
+        if (!container) return;
+
+        if (dbPendingReviews.length === 0) {
+            container.innerHTML = `<div class="text-xs text-slate-500 italic p-4 text-center">No pending reviews awaiting approval.</div>`;
+            return;
+        }
+
+        container.innerHTML = dbPendingReviews.map(rev => `
+            <div class="bg-slate-50 border border-slate-200 rounded-0-0-lg p-4 space-y-3 text-xs">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <span class="font-bold text-slate-900 text-sm">${rev.labName}</span>
+                        <span class="text-slate-500">(${rev.labInstitution})</span>
+                        <div class="text-[11px] text-slate-500 mt-0.5">
+                            <span class="font-semibold text-slate-700">${rev.role || 'Researcher'}</span> · 
+                            <span>${rev.relationship || 'Lab Member'}</span> · 
+                            <span class="text-slate-400">Submitted in ${rev.year || '2026'}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0">
+                        <button onclick="approveReview('${rev.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-0-0 font-semibold transition shadow-sm">Approve</button>
+                        <button onclick="rejectReview('${rev.id}')" class="px-2.5 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-0-0 font-semibold transition">Reject</button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-3 rounded-0-0 border border-slate-200 space-y-2">
+                    <p class="text-slate-700 leading-relaxed italic">"${rev.text || 'No qualitative text provided (rating scores only).'}"</p>
+                    
+                    ${rev.ratings ? `
+                        <div class="pt-2 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-slate-600">
+                            <div>Research: <strong class="text-slate-900">${rev.ratings.research || '3.0'}</strong></div>
+                            <div>Mentorship: <strong class="text-slate-900">${rev.ratings.mentorship || '3.0'}</strong></div>
+                            <div>Work-Life: <strong class="text-slate-900">${rev.ratings.worklife || '3.0'}</strong></div>
+                            <div>Environment: <strong class="text-slate-900">${rev.ratings.environment || '3.0'}</strong></div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `).join('');
+
+        lucide.createIcons();
+    }
+
+    // APPROVE REVIEW ACTION
+    async function approveReview(reviewId) {
+        if (isSupabaseConnected && supabaseClient) {
+            const { error } = await supabaseClient
+                .from('reviews')
+                .update({ status: 'approved' })
+                .eq('id', reviewId);
+
+            if (error) {
+                alert("Error approving review: " + error.message);
+                return;
+            }
+            alert("Review approved! It is now published on the laboratory profile.");
+            await fetchLabsFromCloud();
+        } else {
+            // Local fallback logic
+            const idx = dbPendingReviews.findIndex(r => r.id === reviewId);
+            if (idx > -1) {
+                const approvedRev = dbPendingReviews.splice(idx, 1)[0];
+                const pi = dbPIs.find(p => p.id === approvedRev.labId);
+                if (pi) {
+                    approvedRev.status = 'approved';
+                    pi.reviews.unshift(approvedRev);
+                    pi.responsesCount += 1;
+                }
+                renderAdminPendingReviews();
+                renderDirectory();
+                alert("Review approved in demo mode.");
+            }
+        }
+    }
+
+    // REJECT REVIEW ACTION
+    async function rejectReview(reviewId) {
+        if (!confirm("Are you sure you want to reject and delete this review?")) return;
+
+        if (isSupabaseConnected && supabaseClient) {
+            const { error } = await supabaseClient
+                .from('reviews')
+                .delete()
+                .eq('id', reviewId);
+
+            if (error) {
+                alert("Error rejecting review: " + error.message);
+                return;
+            }
+            alert("Review rejected and removed.");
+            await fetchLabsFromCloud();
+        } else {
+            dbPendingReviews = dbPendingReviews.filter(r => r.id !== reviewId);
+            renderAdminPendingReviews();
+            alert("Review rejected in demo mode.");
+        }
+    }
+
+    function checkDuplicatePi() {
+        const nameVal = document.getElementById('admin-pi-name').value.trim();
+        const warnBox = document.getElementById('duplicate-warning');
+        const msg = document.getElementById('duplicate-msg');
+
+        if (!nameVal) { warnBox.classList.add('hidden'); return; }
+
+        const existing = dbPIs.find(p => p.name.toLowerCase() === nameVal.toLowerCase());
+        if (existing) {
+            msg.textContent = `A laboratory profile for "${existing.name}" already exists at ${existing.institution}.`;
+            warnBox.classList.remove('hidden');
+        } else { warnBox.classList.add('hidden'); }
+    }
+
+    async function saveAdminPi(e) {
+        e.preventDefault();
+        const id = document.getElementById('admin-pi-id').value;
+        const name = document.getElementById('admin-pi-name').value.trim();
+        const instType = document.getElementById('admin-pi-inst-type').value;
+        const inst = document.getElementById('admin-pi-inst').value.trim();
+        const dept = document.getElementById('admin-pi-dept').value.trim();
+        const area = document.getElementById('admin-pi-area').value.trim();
+        const loc = document.getElementById('admin-pi-location').value.trim();
+        const keywordsRaw = document.getElementById('admin-pi-keywords').value;
+        const website = document.getElementById('admin-pi-website').value.trim();
+        const status = document.getElementById('admin-pi-status').value;
+
+        const keywords = keywordsRaw.split(',').map(k => k.trim()).filter(k => k.length > 0);
+
+        if (isSupabaseConnected && supabaseClient) {
+            const payload = {
+                name, inst_type: instType, institution: inst,
+                department: dept, area, location: loc, keywords,
+                website, status
+            };
+
+            let err = null;
+            if (id) {
+                const res = await supabaseClient.from('labs').update(payload).eq('id', id);
+                err = res.error;
+            } else {
+                const res = await supabaseClient.from('labs').insert([{ ...payload, status: 'approved' }]);
+                err = res.error;
+            }
+
+            if (err) { alert("Cloud save error: " + err.message); return; }
+            await fetchLabsFromCloud();
+        } else {
+            if (id) {
+                const pi = dbPIs.find(p => p.id === id);
+                if (pi) {
+                    pi.name = name; pi.instType = instType; pi.institution = inst;
+                    pi.department = dept; pi.area = area; pi.location = loc;
+                    pi.keywords = keywords; pi.website = website; pi.status = status;
+                }
+            } else {
+                dbPIs.push({
+                    id: 'pi-' + Date.now(),
+                    name, instType, institution: inst, department: dept, area,
+                    keywords, location: loc, website, status, responsesCount: 0,
+                    metrics: { research: 0, output: 0, opportunities: 0, environment: 0, mentorship: 0, worklife: 0, authorship: 0, collaboration: 0, funding: 0, career: 0, admin: 0 },
+                    reviews: []
+                });
+            }
+            renderAdminTable();
+            renderDirectory();
+        }
+
+        closeModal('modal-admin-pi');
+    }
+
+    function editPiModal(id) {
+        const pi = dbPIs.find(p => p.id === id);
+        if (!pi) return;
+
+        document.getElementById('admin-pi-modal-title').textContent = "Admin: Edit PI Profile";
+        document.getElementById('admin-pi-id').value = pi.id;
+        document.getElementById('admin-pi-name').value = pi.name;
+        document.getElementById('admin-pi-inst-type').value = pi.instType;
+        document.getElementById('admin-pi-inst').value = pi.institution;
+        document.getElementById('admin-pi-dept').value = pi.department;
+        document.getElementById('admin-pi-area').value = pi.area;
+        document.getElementById('admin-pi-location').value = pi.location;
+        document.getElementById('admin-pi-keywords').value = pi.keywords.join(', ');
+        document.getElementById('admin-pi-website').value = pi.website || '';
+        document.getElementById('admin-pi-status').value = pi.status;
+
+        document.getElementById('modal-admin-pi').classList.remove('hidden');
+    }
+
+    async function deletePi(id) {
+        if (confirm("Archive/Delete this PI profile?")) {
+            if (isSupabaseConnected && supabaseClient) {
+                const { error } = await supabaseClient.from('labs').delete().eq('id', id);
+                if (error) { alert("Error deleting lab: " + error.message); return; }
+                await fetchLabsFromCloud();
+            } else {
+                dbPIs = dbPIs.filter(p => p.id !== id);
+                renderAdminTable();
+                renderDirectory();
+            }
+        }
+    }
+
+    async function approveSuggestion(sugId) {
+        const sug = dbSuggestions.find(s => s.id === sugId);
+        if (!sug) return;
+
+        if (isSupabaseConnected && supabaseClient) {
+            const { error: insertErr } = await supabaseClient.from('labs').insert([{
+                name: sug.name,
+                institution: sug.institution,
+                inst_type: sug.institution.includes('IIT') ? 'IIT' : 'Other',
+                department: sug.department,
+                area: sug.area || 'General Science',
+                keywords: ['Research'],
+                status: 'approved'
+            }]);
+
+            if (!insertErr) {
+                await supabaseClient.from('suggestions').update({ status: 'Approved' }).eq('id', sugId);
+                await fetchLabsFromCloud();
+            }
+        } else {
+            dbPIs.push({
+                id: 'pi-' + Date.now(),
+                name: sug.name,
+                instType: sug.institution.includes('IIT') ? 'IIT' : 'Other',
+                institution: sug.institution,
+                department: sug.department,
+                area: sug.area || 'General Science',
+                keywords: ['Research'],
+                location: 'India',
+                status: 'Active',
+                responsesCount: 0,
+                metrics: { research: 0, output: 0, opportunities: 0, environment: 0, mentorship: 0, worklife: 0, authorship: 0, collaboration: 0, funding: 0, career: 0, admin: 0 },
+                reviews: []
+            });
+            dbSuggestions = dbSuggestions.filter(s => s.id !== sugId);
+            renderAdminQueue();
+            renderAdminTable();
+            renderDirectory();
+        }
+    }
+
+    async function rejectSuggestion(sugId) {
+        if (isSupabaseConnected && supabaseClient) {
+            await supabaseClient.from('suggestions').update({ status: 'Rejected' }).eq('id', sugId);
+            await fetchLabsFromCloud();
+        } else {
+            dbSuggestions = dbSuggestions.filter(s => s.id !== sugId);
+            renderAdminQueue();
+        }
+    }
+
+    // SUBMIT RATING (WITH PENDING STATUS)
+    function buildRatingSliders() {
+        const container = document.getElementById('rating-sliders-container');
+        container.innerHTML = RATING_CATEGORIES.map(cat => `
+            <div class="bg-slate-50 p-3 rounded-0-0-lg border border-slate-200">
+                <div class="flex items-center justify-between mb-1">
+                    <label class="text-xs font-bold text-slate-800">${cat.label}</label>
+                    <span class="text-xs font-extrabold text-brand-600" id="slider-val-${cat.id}">3.0</span>
+                </div>
+                <input type="range" id="slider-${cat.id}" min="1" max="5" step="0.5" value="3.0" oninput="document.getElementById('slider-val-${cat.id}').textContent = this.value" class="w-full h-1.5 bg-slate-300 rounded-0-0-lg appearance-none cursor-pointer accent-brand-600">
+                <p class="text-[10px] text-slate-500 mt-1">${cat.desc}</p>
+            </div>
+        `).join('');
+    }
+
+    function openRateModal() {
+        if (!currentProfileId) return;
+        const pi = dbPIs.find(p => p.id === currentProfileId);
+        if (!pi) return;
+
+        document.getElementById('rate-modal-title').textContent = `Anonymous Rating for ${pi.name}`;
+        document.getElementById('rate-pi-id').value = pi.id;
+
+        const alreadyRated = hasDeviceRatedLab(pi.id);
+        const notice = document.getElementById('device-already-rated-notice');
+        const submitBtn = document.getElementById('submit-rating-btn');
+
+        if (alreadyRated) {
+            notice.classList.remove('hidden');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            submitBtn.innerText = "Already Rated on This Device";
+        } else {
+            notice.classList.add('hidden');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            submitBtn.innerText = "Submit Anonymous Rating";
+        }
+
+        document.getElementById('modal-rate').classList.remove('hidden');
+        lucide.createIcons();
+    }
+
+    async function submitLabRating(e) {
+        e.preventDefault();
+        const labId = document.getElementById('rate-pi-id').value;
+
+        if (hasDeviceRatedLab(labId)) {
+            alert("You have already submitted a rating for this laboratory from this device.");
+            return;
+        }
+
+        const btn = document.getElementById('submit-rating-btn');
+        btn.disabled = true;
+        btn.textContent = "Submitting...";
+
+        const ratingsObj = {};
+        RATING_CATEGORIES.forEach(cat => {
+            ratingsObj[cat.id] = parseFloat(document.getElementById(`slider-${cat.id}`).value);
+        });
+
+        const role = document.getElementById('rate-role').value;
+        const relationship = document.getElementById('rate-relationship').value;
+        const reviewText = document.getElementById('rate-review-text').value.trim();
+
+        if (isSupabaseConnected && supabaseClient) {
+            const { error } = await supabaseClient.from('reviews').insert([{
+                lab_id: labId,
+                role: role,
+                relationship: relationship,
+                year: '2026',
+                review_text: reviewText,
+                ratings: ratingsObj,
+                status: 'pending' // Defaults to pending for admin moderation
+            }]);
+
+            btn.disabled = false;
+            btn.textContent = "Submit Anonymous Rating";
+
+            if (error) {
+                alert("Error submitting rating: " + error.message);
+            } else {
+                recordDeviceRating(labId);
+                closeModal('modal-rate');
+                document.getElementById('form-rate-lab').reset();
+                await fetchLabsFromCloud();
+                alert("Thank you! Your review has been submitted to the administrator moderation queue for verification.");
+            }
+        } else {
+            // Local fallback demo mode
+            const pi = dbPIs.find(p => p.id === labId);
+            dbPendingReviews.push({
+                id: 'r-' + Date.now(),
+                labId: labId,
+                labName: pi ? pi.name : 'Unknown Lab',
+                labInstitution: pi ? pi.institution : '',
+                role: role,
+                relationship: relationship,
+                year: '2026',
+                text: reviewText,
+                ratings: ratingsObj,
+                status: 'pending'
+            });
+
+            recordDeviceRating(labId);
+            btn.disabled = false;
+            btn.textContent = "Submit Anonymous Rating";
+            closeModal('modal-rate');
+            document.getElementById('form-rate-lab').reset();
+            alert("Review submitted to local demo moderation queue.");
+        }
+    }
+
+    function openSuggestModal() { document.getElementById('modal-suggest').classList.remove('hidden'); }
+
+    async function submitLabSuggestion(e) {
+        e.preventDefault();
+        const name = document.getElementById('sug-name').value.trim();
+        const inst = document.getElementById('sug-inst').value.trim();
+        const dept = document.getElementById('sug-dept').value.trim();
+        const area = document.getElementById('sug-area').value.trim();
+
+        if (isSupabaseConnected && supabaseClient) {
+            const { error } = await supabaseClient.from('suggestions').insert([{
+                name, institution: inst, department: dept, area
+            }]);
+
+            if (error) {
+                alert("Error submitting suggestion: " + error.message);
+            } else {
+                closeModal('modal-suggest');
+                alert("Suggestion submitted to administrator moderation queue.");
+                await fetchLabsFromCloud();
+            }
+        } else {
+            dbSuggestions.push({
+                id: 'sug-' + Date.now(), name, institution: inst, department: dept, area
+            });
+            closeModal('modal-suggest');
+            alert("Suggestion submitted to local moderation queue.");
+        }
+    }
+
+    function openReportModal(revId) { document.getElementById('modal-report').classList.remove('hidden'); }
+    function submitReport(e) { e.preventDefault(); closeModal('modal-report'); alert("Report logged for administrator review."); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    // UTILITIES
+    function calculateOverallScore(metrics) {
+        const vals = Object.values(metrics);
+        if (vals.length === 0) return 0;
+        const sum = vals.reduce((a, b) => a + b, 0);
+        return sum / vals.length;
+    }
+
+    function renderStarRating(score) {
+        let stars = '';
+        const fullStars = Math.floor(score);
+        const hasHalf = score - fullStars >= 0.5;
+
+        for (let i = 0; i < fullStars; i++) {
+            stars += `<i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>`;
+        }
+        if (hasHalf) {
+            stars += `<i data-lucide="star-half" class="w-3.5 h-3.5 fill-current"></i>`;
+        }
+        return stars;
+    }
+</script>
+</body>
+</html>
